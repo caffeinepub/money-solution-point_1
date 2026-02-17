@@ -1,0 +1,14 @@
+{
+  "frontend/src/App.tsx": "Root application component that wraps the app with QueryClient, InternetIdentity, and Theme providers, rendering the main VisitorTracker component with toast notifications.",
+  "frontend/src/components/VisitorTracker.tsx": "Main dashboard component displaying the office header with admin controls, visitor entry form, records table, and export functionality (CSV/Excel) available only in admin mode.",
+  "frontend/src/components/VisitorForm.tsx": "Form component for adding new visitor records with validation for all required fields including name, contact, address, organization, income level, visit type, and purpose.",
+  "frontend/src/components/VisitorTable.tsx": "Responsive table component displaying all visitor records with formatted timestamps, badges for visit types and income levels, and empty state when no records exist.",
+  "frontend/src/components/AdminLogin.tsx": "Dialog component for admin authentication using password 9533, enabling admin mode for export features upon successful login.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for fetching visitor records, adding new records, and handling admin login with automatic cache invalidation.",
+  "frontend/src/hooks/useAdminMode.ts": "Custom hook managing admin mode state in sessionStorage, providing login/logout functions and persistent admin session across page refreshes.",
+  "frontend/src/utils/formatTimestamp.ts": "Utility function converting backend nanosecond timestamps to human-readable date/time strings in English format.",
+  "frontend/src/utils/exportToCSV.ts": "Client-side CSV export utility that converts visitor records to CSV format with proper escaping and triggers browser download.",
+  "frontend/src/utils/exportToXLSX.ts": "Client-side Excel export utility using SheetJS library dynamically imported from CDN with proper TypeScript type definitions and @vite-ignore comment to generate .xlsx files with formatted columns and compression.",
+  "frontend/src/index.css": "Global styles with OKLCH color system defining a professional blue-themed palette for light and dark modes suitable for office administration.",
+  "frontend/tailwind.config.js": "Tailwind configuration with custom color tokens, Inter font family, and extended theme settings for consistent professional office design."
+}

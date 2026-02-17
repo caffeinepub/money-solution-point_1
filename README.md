@@ -1,2 +1,3 @@
-# money-solution-point_1
-Exported from Caffeine project: MONEY SOLUTION POINT
+## MONEY SOLUTION POINT
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

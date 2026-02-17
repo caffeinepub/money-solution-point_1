@@ -1,0 +1,86 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-17T11:13:05.004Z",
+  "summary": "Core visitor tracking flow, backend-generated timestamps, admin password login (9533), and UI/table display are present. However, the Excel export relies on an external CDN library (conflicting with the 'no external services' constraint for export), and there are unrequested authentication/authorization systems (Internet Identity + access control + URL token secret) added. There is also a likely timestamp type mismatch between backend (Int) and frontend (bigint) that could prevent timestamp display/export from working.",
+  "missing_requirements": [
+    {
+      "id": "REQ-4",
+      "requirement": "Export actions work entirely in the client (download triggered in the browser) without requiring external services.",
+      "reason": "The Excel export implementation dynamically imports SheetJS from an external CDN URL, which requires an external network service at export time.",
+      "evidence": [
+        "frontend/src/utils/exportToXLSX.ts"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Each record displays a created-at timestamp in the UI (backend-generated), and timestamp handling works end-to-end.",
+      "reason": "Backend stores timestamp as Motoko Int (Time.now()), but the frontend formatter expects a bigint. This mismatch could break timestamp rendering/export in the UI.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/utils/formatTimestamp.ts",
+        "frontend/src/components/VisitorTable.tsx",
+        "frontend/src/utils/exportToCSV.ts",
+        "frontend/src/utils/exportToXLSX.ts"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Internet Identity authentication flow added (AuthClient, identity provider, identity-based actor creation).",
+      "reason": "BuildRequest explicitly states no third-party authentication providers and only password-based admin mode; Internet Identity is not requested for the app’s functionality.",
+      "evidence": [
+        "frontend/src/main.tsx",
+        "frontend/src/hooks/useInternetIdentity.ts",
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "description": "Backend role/permission system with access control initialization, role assignment, and authorization mixins.",
+      "reason": "BuildRequest only requested a simple password-based Admin mode for export restrictions; a generalized access-control/role system is not requested.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "Use of a secret URL/session parameter token ('caffeineAdminToken') to initialize access control.",
+      "reason": "BuildRequest specifies password-based admin mode only and does not mention any URL token/secret-based initialization.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/utils/urlParams.ts"
+      ]
+    },
+    {
+      "description": "User profile management endpoints (get/save user profiles) added to backend.",
+      "reason": "No user profile feature is requested in the visitor tracker requirements.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AdminLogin.tsx",
+    "frontend/src/components/VisitorForm.tsx",
+    "frontend/src/components/VisitorTable.tsx",
+    "frontend/src/components/VisitorTracker.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useAdminMode.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/utils/exportToCSV.ts",
+    "frontend/src/utils/exportToXLSX.ts",
+    "frontend/src/utils/formatTimestamp.ts",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

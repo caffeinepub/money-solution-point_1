@@ -1,0 +1,114 @@
+{
+  "kind": "build_request",
+  "title": "Daily Bank Visitor Tracker with Admin Export and Auto Timestamps",
+  "projectName": "MSP Visitor Tracker",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a visitor entry flow for “MONEY SOLUTION POINT” to record daily bank visitor details and save each entry as a persistent record.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "MONEY SOLUTION POINT OFFICE NAME\nDAILY BANKER VISITER TRACKER DETAILS"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The app shows the office name “MONEY SOLUTION POINT” in the main header/title area.",
+        "Users can submit a visitor entry form with clear labeled fields for visitor details (at minimum: visitor name, contact/phone, organization/bank, purpose/remarks).",
+        "Submitting a visitor entry creates a new stored record that is visible in a list/table view after refresh/reload."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Automatically add a timestamp to every visitor record at the time it is created, and display the timestamp in the records list.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "TIME STAMP AUTO ADD"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Timestamps are generated automatically (no manual timestamp input field).",
+        "Each record displays a created-at timestamp in the UI.",
+        "Timestamp assignment is performed by the backend at record creation time (not solely by the browser clock)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add an Admin mode protected by a password login using the exact password value 9533, and restrict export/download actions to Admin mode only.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "ADD ADMIN OPTION PASSWORD 9533"
+        ]
+      },
+      "acceptanceCriteria": [
+        "There is an Admin login UI that prompts for a password.",
+        "Entering password 9533 successfully enables Admin mode; any other password is rejected with an English error message.",
+        "When not in Admin mode, export/download controls are not accessible.",
+        "Admin mode state is clearly indicated in the UI and can be exited/logged out."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Provide Admin-only export of visitor records to downloadable files in CSV and Excel format.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "ADMIN IN GENRATE CSV, EXCEL ETC FILE DATA GENRATE"
+        ]
+      },
+      "acceptanceCriteria": [
+        "In Admin mode, the UI provides actions to export/download all visitor records as CSV (.csv).",
+        "In Admin mode, the UI provides an action to export/download all visitor records as an Excel-compatible file (.xlsx) or equivalent Excel-openable format.",
+        "Exported files include the same fields shown in the records list, including the auto timestamp.",
+        "Export actions work entirely in the client (download triggered in the browser) without requiring external services."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement a coherent, professional office-admin visual theme (colors, typography, spacing, and layout) and apply it consistently across the visitor form, records table, and admin/export views (use English UI labels).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Use English for any user-facing text in the build request."
+        ]
+      },
+      "acceptanceCriteria": [
+        "All UI labels and messages are in English.",
+        "The app uses a consistent visual style suitable for an office tracker (e.g., clean neutrals, clear typography, strong table readability).",
+        "Primary screens (entry form, records list, admin login/export) share consistent components and spacing."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not modify files under frontend/src/components/ui or any other immutable frontend paths specified by the system.",
+    "Use the exact admin password value: 9533."
+  ],
+  "nonGoals": [
+    "No third-party authentication providers (only password-based admin mode as requested).",
+    "No real-time updates (no websockets/live collaboration).",
+    "No external databases or cloud services; store records on the Internet Computer backend only."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
