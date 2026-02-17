@@ -1,111 +1,72 @@
 {
   "kind": "build_request",
-  "title": "Daily Bank Visitor Tracker with Admin Export and Auto Timestamps",
-  "projectName": "MSP Visitor Tracker",
+  "title": "Persist shared visitor records on the canister so all users see the same data in Admin view",
+  "projectName": "MONEY SOLUTION POINT",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Create a visitor entry flow for “MONEY SOLUTION POINT” to record daily bank visitor details and save each entry as a persistent record.",
-      "target": "both",
+      "id": "REQ-16",
+      "text": "Store visitor records and the next entry ID in stable canister state so data is saved on the server and remains available across canister upgrades/redeploys, and so all users accessing the website contribute to the same shared dataset.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "MONEY SOLUTION POINT OFFICE NAME\nDAILY BANKER VISITER TRACKER DETAILS"
+          "DATA SAVE IN SERVER ALL ACCESS THIS WEBSITE AND SAME DATA SHOW IN ADMIN"
         ]
       },
       "acceptanceCriteria": [
-        "The app shows the office name “MONEY SOLUTION POINT” in the main header/title area.",
-        "Users can submit a visitor entry form with clear labeled fields for visitor details (at minimum: visitor name, contact/phone, organization/bank, purpose/remarks).",
-        "Submitting a visitor entry creates a new stored record that is visible in a list/table view after refresh/reload."
+        "After adding a visitor record, the record is persisted in canister stable state (not only in-memory).",
+        "After a canister upgrade/redeploy, previously added visitor records are still present.",
+        "Records added by one user/device are visible to an Admin user/device after Admin unlock (shared global dataset)."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Automatically add a timestamp to every visitor record at the time it is created, and display the timestamp in the records list.",
-      "target": "both",
+      "id": "REQ-17",
+      "text": "Add conditional state migration support (backend/migration.mo) to safely upgrade existing deployments to the new stable storage format without data loss.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "TIME STAMP AUTO ADD"
+          "DATA SAVE IN SERVER ALL ACCESS THIS WEBSITE AND SAME DATA SHOW IN ADMIN"
         ]
       },
       "acceptanceCriteria": [
-        "Timestamps are generated automatically (no manual timestamp input field).",
-        "Each record displays a created-at timestamp in the UI.",
-        "Timestamp assignment is performed by the backend at record creation time (not solely by the browser clock)."
+        "If an existing canister already has visitor records, upgrading to the new version preserves all existing records and their IDs.",
+        "Upgrades do not change the existing VisitorRecord fields or break Admin-only access to listing/export/editing records."
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Add an Admin mode protected by a password login using the exact password value 9533, and restrict export/download actions to Admin mode only.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "ADD ADMIN OPTION PASSWORD 9533"
-        ]
-      },
-      "acceptanceCriteria": [
-        "There is an Admin login UI that prompts for a password.",
-        "Entering password 9533 successfully enables Admin mode; any other password is rejected with an English error message.",
-        "When not in Admin mode, export/download controls are not accessible.",
-        "Admin mode state is clearly indicated in the UI and can be exited/logged out."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Provide Admin-only export of visitor records to downloadable files in CSV and Excel format.",
+      "id": "REQ-18",
+      "text": "Ensure the Admin records table and Admin exports always reflect the server-stored shared dataset (no per-device/per-browser local-only storage for visitor records).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "ADMIN IN GENRATE CSV, EXCEL ETC FILE DATA GENRATE"
+          "DATA SAVE IN SERVER ALL ACCESS THIS WEBSITE AND SAME DATA SHOW IN ADMIN"
         ]
       },
       "acceptanceCriteria": [
-        "In Admin mode, the UI provides actions to export/download all visitor records as CSV (.csv).",
-        "In Admin mode, the UI provides an action to export/download all visitor records as an Excel-compatible file (.xlsx) or equivalent Excel-openable format.",
-        "Exported files include the same fields shown in the records list, including the auto timestamp.",
-        "Export actions work entirely in the client (download triggered in the browser) without requiring external services."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Implement a coherent, professional office-admin visual theme (colors, typography, spacing, and layout) and apply it consistently across the visitor form, records table, and admin/export views (use English UI labels).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Use English for any user-facing text in the build request."
-        ]
-      },
-      "acceptanceCriteria": [
-        "All UI labels and messages are in English.",
-        "The app uses a consistent visual style suitable for an office tracker (e.g., clean neutrals, clear typography, strong table readability).",
-        "Primary screens (entry form, records list, admin login/export) share consistent components and spacing."
+        "No visitor record data is stored as the source-of-truth in localStorage/sessionStorage on the client.",
+        "After an Admin unlock, the table and export actions use records fetched from the backend canister and match the shared server state."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not modify files under frontend/src/components/ui or any other immutable frontend paths specified by the system.",
-    "Use the exact admin password value: 9533."
+    "Keep the backend as a single Motoko actor in backend/main.mo; do not introduce additional backend services.",
+    "Do not modify files under frontend/src/components/ui or any frontend immutablePaths listed in SYSTEM_CONTEXT.",
+    "All user-facing text must be in English.",
+    "Keep existing Admin-only restrictions: viewing the records table, editing records, and exporting records remain Admin-only; adding a new visitor record remains available to non-admin users."
   ],
   "nonGoals": [
-    "No third-party authentication providers (only password-based admin mode as requested).",
-    "No real-time updates (no websockets/live collaboration).",
-    "No external databases or cloud services; store records on the Internet Computer backend only."
+    "Adding third-party databases or external storage providers.",
+    "Implementing real-time updates (e.g., WebSockets) for live syncing across clients.",
+    "Changing the Admin password value or Admin unlock UX flow beyond what is necessary to ensure shared server-backed data is displayed."
   ],
   "imageRequirements": {
     "required": [],

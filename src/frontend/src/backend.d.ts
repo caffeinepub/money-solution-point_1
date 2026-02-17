@@ -32,7 +32,6 @@ export enum UserRole {
 }
 export interface backendInterface {
     addVisitorRecord(fullName: string, email: string, address: string, jobInfo: string, incomeLevel: string, reasonForVisit: string, visitType: string): Promise<void>;
-    adminLogin(password: string): Promise<boolean>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     exportVisitorRecords(): Promise<Array<EntryIdVisitorRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -41,4 +40,5 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    updateVisitorRecord(recordId: Nat, fullName: string, email: string, address: string, jobInfo: string, incomeLevel: string, reasonForVisit: string, visitType: string): Promise<void>;
 }

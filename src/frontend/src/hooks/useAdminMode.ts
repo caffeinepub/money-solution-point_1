@@ -1,35 +1,37 @@
 import { useState, useEffect } from 'react';
 
-const ADMIN_MODE_KEY = 'msp_admin_mode';
+const ADMIN_PASSWORD = 'MSP508';
+const ADMIN_SESSION_KEY = 'msp_admin_unlocked';
 
 export function useAdminMode() {
-  const [isAdminMode, setIsAdminMode] = useState(() => {
-    try {
-      return sessionStorage.getItem(ADMIN_MODE_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check session storage on mount
   useEffect(() => {
-    try {
-      if (isAdminMode) {
-        sessionStorage.setItem(ADMIN_MODE_KEY, 'true');
-      } else {
-        sessionStorage.removeItem(ADMIN_MODE_KEY);
-      }
-    } catch (error) {
-      console.warn('Failed to update admin mode in session storage:', error);
-    }
-  }, [isAdminMode]);
+    const stored = sessionStorage.getItem(ADMIN_SESSION_KEY);
+    setIsUnlocked(stored === 'true');
+    setIsLoading(false);
+  }, []);
 
-  const login = () => setIsAdminMode(true);
-  
-  const logout = () => setIsAdminMode(false);
+  const unlock = (password: string): boolean => {
+    if (password === ADMIN_PASSWORD) {
+      setIsUnlocked(true);
+      sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+      return true;
+    }
+    return false;
+  };
+
+  const lock = () => {
+    setIsUnlocked(false);
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  };
 
   return {
-    isAdminMode,
-    login,
-    logout,
+    isUnlocked,
+    isLoading,
+    unlock,
+    lock,
   };
 }

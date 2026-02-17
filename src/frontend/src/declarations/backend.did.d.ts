@@ -32,7 +32,6 @@ export interface _SERVICE {
     [string, string, string, string, string, string, string],
     undefined
   >,
-  'adminLogin' : ActorMethod<[string], boolean>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'exportVisitorRecords' : ActorMethod<[], Array<EntryIdVisitorRecord>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
@@ -41,6 +40,10 @@ export interface _SERVICE {
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'updateVisitorRecord' : ActorMethod<
+    [Nat, string, string, string, string, string, string, string],
+    undefined
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

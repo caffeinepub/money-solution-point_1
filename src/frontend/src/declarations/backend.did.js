@@ -37,7 +37,6 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
-  'adminLogin' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'exportVisitorRecords' : IDL.Func(
       [],
@@ -58,6 +57,20 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'updateVisitorRecord' : IDL.Func(
+      [
+        Nat,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+      ],
+      [],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -92,7 +105,6 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
-    'adminLogin' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'exportVisitorRecords' : IDL.Func(
         [],
@@ -113,6 +125,20 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'updateVisitorRecord' : IDL.Func(
+        [
+          Nat,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+        ],
+        [],
+        [],
+      ),
   });
 };
 

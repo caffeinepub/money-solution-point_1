@@ -1,13 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "Office tool to track daily bank visitors for “MONEY SOLUTION POINT” with admin login (password 9533), automatic timestamping, and admin export of records to CSV/Excel.",
+  "projectStateVersion": 11,
+  "summary": "Office tool to track daily bank visitors for “MONEY SOLUTION POINT” with automatic timestamping, server-side persistent storage shared across all users/devices, and an Admin mode protected by password \"MSP508\"; viewing all records, editing, and downloading/exporting are Admin-only actions while visitor entry remains available to non-admin users.",
   "architectural_notes": [
-    "Include an admin login mechanism (password-based) and an admin dashboard for managing/exporting records."
+    "Admin mode is protected by a single shared password \"MSP508\" (no admin ID); Admin-only actions include view all records, edit, and download/export.",
+    "Visitor records must be persisted server-side in a shared datastore so data is consistent across all users/devices; Admin views should read from the same shared dataset."
   ],
-  "known_issues": [
-    "Admin password is specified as a fixed plain-text value (9533), which is insecure if used in production."
-  ],
+  "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
@@ -41,18 +40,84 @@
         "REQ-5"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-remove-any-concept-of-an-admin-id-and-make-admin-unlock-access-available-to-any-user-via-a-single-password-prompt-using-the-exact-password-value-9533-english-ui-labels-admin-features-must-remain-hidden-disabled-until-the-correct-password-is-entered",
+      "title": "Remove any concept of an “admin ID” and make admin/unlock access available to any user via a single password prompt using the exact password value \"9533\" (English UI labels). Admin features must remain hidden/disabled until the correct password is entered.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-password-based-admin-authentication-flow-so-the-app-no-longer-prompts-for-an-admin-password-and-no-longer-calls-backend-admin-authentication",
+      "title": "Remove the password-based admin authentication flow so the app no longer prompts for an admin password and no longer calls backend admin authentication.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-visitor-record-export-csv-and-excel-available-without-admin-mode-gating-and-ensure-export-actions-work-without-any-admin-login-unlock-step",
+      "title": "Make visitor record export (CSV and Excel) available without admin mode gating, and ensure export actions work without any admin login/unlock step.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-clean-up-admin-mode-state-handling-in-the-frontend-so-it-does-not-affect-the-ui-or-exports-remove-admin-sessionstorage-state-usage-and-related-logout-admin-indicators",
+      "title": "Clean up admin-mode state handling in the frontend so it does not affect the UI or exports (remove admin sessionStorage state usage and related logout/admin indicators).",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-reintroduce-an-admin-unlock-flow-using-the-exact-admin-password-value-msp508-any-user-can-enter-this-password-to-unlock-admin-features-no-admin-id-and-no-per-user-restriction-all-user-facing-text-must-be-in-english",
+      "title": "Reintroduce an Admin unlock flow using the exact admin password value \"MSP508\"; any user can enter this password to unlock Admin features (no admin ID and no per-user restriction). All user-facing text must be in English.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restrict-viewing-the-full-visitor-records-list-table-to-admin-only-access-non-admin-users-can-still-submit-new-visitor-entries-but-they-must-not-be-able-to-see-the-records-table-or-any-record-details",
+      "title": "Restrict viewing the full visitor records list/table to Admin-only access: non-admin users can still submit new visitor entries, but they must not be able to see the records table or any record details.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restrict-downloading-exporting-visitor-records-csv-and-excel-to-admin-only-access",
+      "title": "Restrict downloading/exporting visitor records (CSV and Excel) to Admin-only access.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-admin-only-ability-to-edit-an-existing-visitor-record-and-ensure-non-admin-users-cannot-edit-records",
+      "title": "Add an Admin-only ability to edit an existing visitor record, and ensure non-admin users cannot edit records.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-admin-records-table-and-admin-exports-always-reflect-the-server-stored-shared-dataset-no-per-device-per-browser-local-only-storage-for-visitor-records",
+      "title": "Ensure the Admin records table and Admin exports always reflect the server-stored shared dataset (no per-device/per-browser local-only storage for visitor records).",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
     {
       "id": "AR-1",
       "summary": "Create daily bank visitor tracking form to log visitor details for MONEY SOLUTION POINT",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Add admin option/login using password 9533",
       "reqIds": [],
       "status": "pending"
     },
@@ -73,6 +138,48 @@
       "summary": "Provide Admin-only export of visitor records to downloadable files in CSV and Excel format.",
       "reqIds": [
         "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Reintroduce Admin mode with password \"MSP508\" (no admin ID); any user can unlock Admin via the single password",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Restrict viewing all data, editing records, and downloading/exporting to Admin-only options (after Admin unlock)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Implement backend Admin unlock and authorization checks using the exact password \"MSP508\" to gate: list records, export records, and edit records; adding a new visitor record must remain open to everyone.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Store visitor records on the server (shared database) so all users accessing the website see the same data; Admin view should reflect the same shared records.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Store visitor records and the next entry ID in stable canister state so data is saved on the server and remains available across canister upgrades/redeploys, and so all users accessing the website contribute to the same shared dataset.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Add conditional state migration support (backend/migration.mo) to safely upgrade existing deployments to the new stable storage format without data loss.",
+      "reqIds": [
+        "REQ-17"
       ],
       "status": "pending"
     }

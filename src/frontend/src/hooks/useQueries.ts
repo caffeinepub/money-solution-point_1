@@ -12,7 +12,7 @@ interface VisitorFormData {
   visitType: string;
 }
 
-export function useGetVisitorRecords() {
+export function useGetVisitorRecords(enabled: boolean = true) {
   const { actor, isFetching } = useActor();
 
   return useQuery<EntryIdVisitorRecord[]>({
@@ -21,7 +21,7 @@ export function useGetVisitorRecords() {
       if (!actor) return [];
       return actor.getSortedVisitorRecords();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !isFetching && enabled,
   });
 }
 
@@ -44,23 +44,38 @@ export function useAddVisitorRecord() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['visitorRecords'] });
+      queryClient.invalidateQueries({ queryKey: ['exportVisitorRecords'] });
     },
   });
 }
 
-export function useAdminLogin() {
+export function useUpdateVisitorRecord() {
   const { actor } = useActor();
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (password: string) => {
+    mutationFn: async (data: VisitorFormData & { id: bigint }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.adminLogin(password);
+      return actor.updateVisitorRecord(
+        data.id,
+        data.fullName,
+        data.email,
+        data.address,
+        data.jobInfo,
+        data.incomeLevel,
+        data.reasonForVisit,
+        data.visitType
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['visitorRecords'] });
+      queryClient.invalidateQueries({ queryKey: ['exportVisitorRecords'] });
     },
   });
 }
 
 export function useExportVisitorRecords() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
 
   return useQuery<EntryIdVisitorRecord[]>({
     queryKey: ['exportVisitorRecords'],

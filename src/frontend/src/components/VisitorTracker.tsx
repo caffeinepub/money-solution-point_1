@@ -1,39 +1,86 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Lock, LogOut, Download, FileSpreadsheet } from 'lucide-react';
+import { Download, FileSpreadsheet, Lock, Unlock } from 'lucide-react';
 import VisitorForm from './VisitorForm';
 import VisitorTable from './VisitorTable';
 import AdminLogin from './AdminLogin';
+import { useGetVisitorRecords, useExportVisitorRecords } from '../hooks/useQueries';
 import { useAdminMode } from '../hooks/useAdminMode';
-import { useGetVisitorRecords } from '../hooks/useQueries';
 import { exportToCSV } from '../utils/exportToCSV';
 import { exportToXLSX } from '../utils/exportToXLSX';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function VisitorTracker() {
-  const { isAdminMode, logout } = useAdminMode();
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const { data: records = [], isLoading } = useGetVisitorRecords();
+  const { isUnlocked, isLoading: adminLoading, unlock, lock } = useAdminMode();
+  const [showAdminDialog, setShowAdminDialog] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  
+  const { data: records = [], isLoading } = useGetVisitorRecords(isUnlocked);
+  const { refetch: refetchExportData } = useExportVisitorRecords();
 
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
+    if (!isUnlocked) {
+      toast.error('Admin access required to export data');
+      return;
+    }
+    
+    setIsExporting(true);
     try {
-      exportToCSV(records);
+      const { data: exportRecords } = await refetchExportData();
+      if (!exportRecords || exportRecords.length === 0) {
+        toast.error('No records available to export');
+        return;
+      }
+      exportToCSV(exportRecords);
       toast.success('CSV file downloaded successfully');
     } catch (error) {
       toast.error('Failed to export CSV');
       console.error('CSV export error:', error);
+    } finally {
+      setIsExporting(false);
     }
   };
 
-  const handleExportXLSX = () => {
+  const handleExportXLSX = async () => {
+    if (!isUnlocked) {
+      toast.error('Admin access required to export data');
+      return;
+    }
+    
+    setIsExporting(true);
     try {
-      exportToXLSX(records);
+      const { data: exportRecords } = await refetchExportData();
+      if (!exportRecords || exportRecords.length === 0) {
+        toast.error('No records available to export');
+        return;
+      }
+      exportToXLSX(exportRecords);
       toast.success('Excel file downloaded successfully');
     } catch (error) {
       toast.error('Failed to export Excel file');
       console.error('XLSX export error:', error);
+    } finally {
+      setIsExporting(false);
     }
+  };
+
+  const handleAdminToggle = () => {
+    if (isUnlocked) {
+      lock();
+      toast.success('Admin mode locked');
+    } else {
+      setShowAdminDialog(true);
+    }
+  };
+
+  const handleUnlock = (password: string): boolean => {
+    const success = unlock(password);
+    if (success) {
+      toast.success('Admin access granted');
+    }
+    return success;
   };
 
   return (
@@ -50,35 +97,25 @@ export default function VisitorTracker() {
                 Daily Banker Visitor Tracker
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              {isAdminMode ? (
+            <Button
+              variant={isUnlocked ? 'default' : 'outline'}
+              size="sm"
+              onClick={handleAdminToggle}
+              disabled={adminLoading}
+              className="gap-2"
+            >
+              {isUnlocked ? (
                 <>
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-medium">
-                    <Lock className="w-4 h-4" />
-                    <span>Admin Mode</span>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={logout}
-                    className="gap-2"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span className="hidden sm:inline">Logout</span>
-                  </Button>
+                  <Unlock className="w-4 h-4" />
+                  <span className="hidden sm:inline">Lock Admin</span>
                 </>
               ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowAdminLogin(true)}
-                  className="gap-2"
-                >
+                <>
                   <Lock className="w-4 h-4" />
-                  <span>Admin Login</span>
-                </Button>
+                  <span className="hidden sm:inline">Unlock Admin</span>
+                </>
               )}
-            </div>
+            </Button>
           </div>
         </div>
       </header>
@@ -108,34 +145,47 @@ export default function VisitorTracker() {
                   <CardTitle className="text-lg font-semibold">
                     Visitor Records
                   </CardTitle>
-                  {isAdminMode && (
+                  {isUnlocked && (
                     <div className="flex gap-2">
                       <Button
                         variant="secondary"
                         size="sm"
                         onClick={handleExportCSV}
-                        disabled={isLoading || records.length === 0}
+                        disabled={isLoading || isExporting || records.length === 0}
                         className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
                       >
                         <FileSpreadsheet className="w-4 h-4" />
-                        <span className="hidden sm:inline">CSV</span>
+                        <span className="hidden sm:inline">
+                          {isExporting ? 'Exporting...' : 'CSV'}
+                        </span>
                       </Button>
                       <Button
                         variant="secondary"
                         size="sm"
                         onClick={handleExportXLSX}
-                        disabled={isLoading || records.length === 0}
+                        disabled={isLoading || isExporting || records.length === 0}
                         className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30"
                       >
                         <Download className="w-4 h-4" />
-                        <span className="hidden sm:inline">Excel</span>
+                        <span className="hidden sm:inline">
+                          {isExporting ? 'Exporting...' : 'Excel'}
+                        </span>
                       </Button>
                     </div>
                   )}
                 </div>
               </CardHeader>
               <CardContent className="pt-6">
-                <VisitorTable records={records} isLoading={isLoading} />
+                {!isUnlocked ? (
+                  <Alert className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30">
+                    <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <AlertDescription className="text-slate-700 dark:text-slate-300">
+                      Visitor records are admin-only. Click "Unlock Admin" in the header to view, export, and edit records.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <VisitorTable records={records} isLoading={isLoading} isAdmin={isUnlocked} />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -163,10 +213,10 @@ export default function VisitorTracker() {
         </div>
       </footer>
 
-      {/* Admin Login Dialog */}
       <AdminLogin
-        open={showAdminLogin}
-        onOpenChange={setShowAdminLogin}
+        open={showAdminDialog}
+        onOpenChange={setShowAdminDialog}
+        onUnlock={handleUnlock}
       />
     </div>
   );

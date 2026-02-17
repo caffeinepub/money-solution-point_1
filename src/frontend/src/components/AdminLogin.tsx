@@ -10,53 +10,57 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAdminLogin } from '../hooks/useQueries';
-import { useAdminMode } from '../hooks/useAdminMode';
-import { toast } from 'sonner';
-import { Loader2, Lock } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Lock } from 'lucide-react';
 
 interface AdminLoginProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUnlock: (password: string) => boolean;
 }
 
-export default function AdminLogin({ open, onOpenChange }: AdminLoginProps) {
+export default function AdminLogin({ open, onOpenChange, onUnlock }: AdminLoginProps) {
   const [password, setPassword] = useState('');
-  const adminLoginMutation = useAdminLogin();
-  const { login } = useAdminMode();
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
 
-    if (!password) {
-      toast.error('Please enter the admin password');
-      return;
-    }
-
-    try {
-      const success = await adminLoginMutation.mutateAsync(password);
-      if (success) {
-        login();
-        toast.success('Admin login successful');
-        onOpenChange(false);
-        setPassword('');
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Login failed: Incorrect password');
+    const success = onUnlock(password);
+    
+    if (success) {
       setPassword('');
+      onOpenChange(false);
+    } else {
+      setError('Incorrect password. Please try again.');
     }
+    
+    setIsSubmitting(false);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setPassword('');
+      setError('');
+    }
+    onOpenChange(newOpen);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Lock className="w-5 h-5" />
-            Admin Login
-          </DialogTitle>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="rounded-full bg-blue-100 dark:bg-blue-900 p-2">
+              <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <DialogTitle>Admin Access</DialogTitle>
+          </div>
           <DialogDescription>
-            Enter the admin password to access export and management features.
+            Enter the admin password to access visitor records, export data, and edit entries.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -66,33 +70,30 @@ export default function AdminLogin({ open, onOpenChange }: AdminLoginProps) {
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter admin password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter admin password"
                 autoFocus
+                disabled={isSubmitting}
               />
             </div>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
           </div>
           <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                onOpenChange(false);
-                setPassword('');
-              }}
+              onClick={() => handleOpenChange(false)}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={adminLoginMutation.isPending}>
-              {adminLoginMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Logging in...
-                </>
-              ) : (
-                'Login'
-              )}
+            <Button type="submit" disabled={isSubmitting || !password}>
+              {isSubmitting ? 'Unlocking...' : 'Unlock Admin'}
             </Button>
           </DialogFooter>
         </form>

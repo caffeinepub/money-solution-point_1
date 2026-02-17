@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-visitor-entry-flow-for-money-solution-point-to-record-daily-bank-visitor-details-and-save-each-entry-as-a-persistent-record",
-      "featureTitle": "Create a visitor entry flow for “MONEY SOLUTION POINT” to record daily bank visitor details and save each entry as a persistent record.",
+      "featureId": "feature-ensure-the-admin-records-table-and-admin-exports-always-reflect-the-server-stored-shared-dataset-no-per-device-per-browser-local-only-storage-for-visitor-records",
+      "featureTitle": "Ensure the Admin records table and Admin exports always reflect the server-stored shared dataset (no per-device/per-browser local-only storage for visitor records).",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/components/VisitorTracker.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,66 +17,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-automatically-add-a-timestamp-to-every-visitor-record-at-the-time-it-is-created-and-display-the-timestamp-in-the-records-list",
-      "featureTitle": "Automatically add a timestamp to every visitor record at the time it is created, and display the timestamp in the records list.",
-      "files": [
-        "frontend/src/App.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-an-admin-mode-protected-by-a-password-login-using-the-exact-password-value-9533-and-restrict-export-download-actions-to-admin-mode-only",
-      "featureTitle": "Add an Admin mode protected by a password login using the exact password value 9533, and restrict export/download actions to Admin mode only.",
-      "files": [
-        "frontend/src/App.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-a-coherent-professional-office-admin-visual-theme-colors-typography-spacing-and-layout-and-apply-it-consistently-across-the-visitor-form-records-table-and-admin-export-views-use-english-ui-labels",
-      "featureTitle": "Implement a coherent, professional office-admin visual theme (colors, typography, spacing, and layout) and apply it consistently across the visitor form, records table, and admin/export views (use English UI labels).",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
+        "REQ-18"
       ],
       "confidence": "high"
     }

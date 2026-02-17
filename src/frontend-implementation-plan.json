@@ -1,142 +1,30 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "MSP Visitor Tracker — Daily Bank Visitor Tracker (Frontend)",
+  "title": "Admin view uses only server-stored shared visitor records",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Implement a visitor entry form for “MONEY SOLUTION POINT” and show submitted records in a list/table using persistent backend data.",
+      "id": "REQ-18",
+      "summary": "Ensure Admin records table and exports use only backend-fetched shared visitor records (no client local storage as source-of-truth).",
       "acceptanceCriteria": [
-        "The app shows the office name “MONEY SOLUTION POINT” in the main header/title area.",
-        "Users can submit a visitor entry form with clear labeled fields for visitor details (at minimum: visitor name, contact/phone, organization/bank, purpose/remarks).",
-        "Submitting a visitor entry creates a new stored record that is visible in a list/table view after refresh/reload."
+        "No visitor record data is stored as the source-of-truth in localStorage/sessionStorage on the client.",
+        "After an Admin unlock, the table and export actions use records fetched from the backend canister and match the shared server state."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
-          "operation": "create",
-          "description": "Create the main single-screen UI containing: a header with “MONEY SOLUTION POINT”, a visitor entry form (Name, Contact (Phone/Email), Organization/Bank, Purpose/Remarks + optional fields that map to existing backend record fields), and a records list/table that reads from the backend and refreshes after successful submission. Wire calls to backend capabilities addVisitorRecord(...) and getSortedVisitorRecords()."
-        },
-        {
-          "path": "frontend/src/features/visitors/types.ts",
-          "operation": "create",
-          "description": "Define frontend types/helpers for mapping UI fields to the backend VisitorRecord shape (e.g., contact -> email field) and for table row rendering."
-        },
-        {
-          "path": "frontend/src/features/visitors/hooks/useVisitorRecords.ts",
-          "operation": "create",
-          "description": "Add a React Query hook to fetch and cache getSortedVisitorRecords() and expose a refetch/invalidate path after form submission."
-        },
-        {
-          "path": "frontend/src/features/visitors/hooks/useAddVisitorRecord.ts",
-          "operation": "create",
-          "description": "Add a React Query mutation hook that calls addVisitorRecord(...) and, on success, invalidates/refetches visitor record queries to ensure newly created records show after refresh/reload."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Display backend-created timestamps for each visitor record and ensure no manual timestamp input exists.",
-      "acceptanceCriteria": [
-        "Timestamps are generated automatically (no manual timestamp input field).",
-        "Each record displays a created-at timestamp in the UI.",
-        "Timestamp assignment is performed by the backend at record creation time (not solely by the browser clock)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/visitors/utils/formatTimestamp.ts",
-          "operation": "create",
-          "description": "Add a utility to format the backend-provided nanosecond timestamp (bigint) into a readable English date/time string for table display."
-        },
-        {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update the records table to include a “Created At” column that uses the backend-provided timestamp field for display; ensure the entry form contains no timestamp input."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Add a password-based Admin mode (password 9533) that gates export/download actions and clearly indicates admin state with logout.",
-      "acceptanceCriteria": [
-        "There is an Admin login UI that prompts for a password.",
-        "Entering password 9533 successfully enables Admin mode; any other password is rejected with an English error message.",
-        "When not in Admin mode, export/download controls are not accessible.",
-        "Admin mode state is clearly indicated in the UI and can be exited/logged out."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/admin/AdminPanel.tsx",
-          "operation": "create",
-          "description": "Create an Admin panel section with a password prompt and login button that calls backend capability adminLogin(password). On success, enable Admin mode (client state); on failure, show an English error message. Include a clear Admin status indicator and a logout/exit control. Use the authorization component’s existing infrastructure (via hooks/useActor + role checks like isCallerAdmin/getCallerUserRole if desired) to support access-restricted UI patterns; verify the component's usage instructions before implementing."
+          "description": "Ensure visitor-record reads and exports are always sourced from backend actor calls (shared dataset). Make export retrieval an explicit backend fetch at export time (not derived from any client-persisted data), and keep query keys/invalidation aligned so Admin table reflects latest server state."
         },
         {
-          "path": "frontend/src/features/admin/useAdminMode.ts",
-          "operation": "create",
-          "description": "Implement a small state hook for Admin mode (e.g., in-memory + sessionStorage) that can be enabled on successful adminLogin and cleared on logout; ensure export controls read only from this state."
-        },
-        {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/VisitorTracker.tsx",
           "operation": "modify",
-          "description": "Wire the AdminPanel into the main screen layout; ensure export/download UI is hidden/disabled unless Admin mode is enabled, and show a clear Admin mode indicator when enabled. Use the authorization component’s recommended pattern for handling backend authorization failures gracefully in UI; verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Implement Admin-only client-side export/download of visitor records as CSV and Excel-openable format, including timestamps.",
-      "acceptanceCriteria": [
-        "In Admin mode, the UI provides actions to export/download all visitor records as CSV (.csv).",
-        "In Admin mode, the UI provides an action to export/download all visitor records as an Excel-compatible file (.xlsx) or equivalent Excel-openable format.",
-        "Exported files include the same fields shown in the records list, including the auto timestamp.",
-        "Export actions work entirely in the client (download triggered in the browser) without requiring external services."
-      ],
-      "file_operations": [
+          "description": "Update Admin export actions to fetch the latest visitor records from the backend at the time of export (e.g., by triggering the export query/refetch) and then pass those fetched records into exportToCSV/exportToXLSX. Keep Admin-only gating unchanged and ensure no visitor-record persistence to localStorage/sessionStorage is introduced."
+        },
         {
-          "path": "frontend/package.json",
+          "path": "frontend/src/components/VisitorTable.tsx",
           "operation": "modify",
-          "description": "Add/ensure a client-side Excel export dependency (e.g., a well-known .xlsx generator library) is available for creating an Excel-compatible file entirely in the browser; keep export fully client-side."
-        },
-        {
-          "path": "frontend/src/features/export/exportVisitorsCsv.ts",
-          "operation": "create",
-          "description": "Create a client-side CSV exporter that accepts the already-fetched records (including timestamp) and triggers a browser download (.csv) using Blob/ObjectURL; ensure columns match the records list fields."
-        },
-        {
-          "path": "frontend/src/features/export/exportVisitorsXlsx.ts",
-          "operation": "create",
-          "description": "Create a client-side Excel export function that converts records to an Excel-compatible file and triggers browser download (.xlsx or equivalent Excel-openable format); ensure it includes the timestamp column and matches the records list fields."
-        },
-        {
-          "path": "frontend/src/features/admin/AdminPanel.tsx",
-          "operation": "modify",
-          "description": "In Admin mode only, render export actions/buttons for CSV and Excel that call the new exporter utilities using the currently loaded visitor records (or fetch via backend capability exportVisitorRecords() before exporting, if the UI list is paged/filtered). Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Apply a consistent professional office-admin theme with English labels across form, table, and admin/export views.",
-      "acceptanceCriteria": [
-        "All UI labels and messages are in English.",
-        "The app uses a consistent visual style suitable for an office tracker (e.g., clean neutrals, clear typography, strong table readability).",
-        "Primary screens (entry form, records list, admin login/export) share consistent components and spacing."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "create",
-          "description": "Create/define global styling tokens and base Tailwind layers for a clean office-admin theme (neutral background, clear typography, consistent spacing). Ensure the styling supports strong table readability and consistent form layout across the app."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Unify layout spacing and component styling for the header, form, records table, and admin/export section using a consistent design system approach (e.g., shadcn-ui components already present). Do not modify files under frontend/src/components/ui; only consume them. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Adjust theme extensions (colors/radius/typography defaults) as needed to support the professional office-admin look consistently across the app without introducing new global stylesheet entry points."
+          "description": "Confirm the Admin records table renders only the records provided from backend-backed React Query state and does not read/write visitor records to localStorage/sessionStorage; if any client-side persistence is present, remove it while preserving Admin-only edit behavior."
         }
       ]
     }

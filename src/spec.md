@@ -1,13 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Build a daily visitor tracking app for “MONEY SOLUTION POINT” that stores visitor entries with backend-generated timestamps and enables Admin-only export.
+**Goal:** Persist visitor records in stable canister state so all users and Admins see the same shared dataset across sessions and canister upgrades.
 
 **Planned changes:**
-- Add a visitor entry form (visitor name, contact/phone, organization/bank, purpose/remarks) and persist submissions as records.
-- Implement backend-generated auto timestamps on record creation and display them in the records list/table.
-- Add an Admin login/logout flow protected by the exact password `9533`, with clear Admin mode indicator and English error messaging on invalid password.
-- Provide Admin-only client-side export/download of all records as CSV and Excel-compatible format, including timestamps.
-- Apply a consistent, professional office-admin theme with English UI labels across form, records table, and Admin/export views.
+- Move visitor records storage (and next entry ID) from in-memory/client-local usage to stable canister state in the existing Motoko backend actor.
+- Add conditional state migration logic to preserve any existing stored visitor records/IDs when upgrading to the new stable storage format.
+- Update the Admin records table and export actions to always fetch and use the server-stored shared dataset (no localStorage/sessionStorage as source-of-truth), while keeping existing Admin-only restrictions.
 
-**User-visible outcome:** Users can enter daily visitor details for MONEY SOLUTION POINT and see saved records with timestamps; Admins (password 9533) can log in to download all records as CSV and Excel-compatible files.
+**User-visible outcome:** Visitor records added by any user are saved on the server and are visible to Admin after unlock; records remain available after canister redeploy/upgrade, and Admin table/exports reflect the shared server dataset.

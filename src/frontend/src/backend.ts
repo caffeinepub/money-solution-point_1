@@ -115,7 +115,6 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     addVisitorRecord(fullName: string, email: string, address: string, jobInfo: string, incomeLevel: string, reasonForVisit: string, visitType: string): Promise<void>;
-    adminLogin(password: string): Promise<boolean>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     exportVisitorRecords(): Promise<Array<EntryIdVisitorRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -124,6 +123,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    updateVisitorRecord(recordId: Nat, fullName: string, email: string, address: string, jobInfo: string, incomeLevel: string, reasonForVisit: string, visitType: string): Promise<void>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -153,20 +153,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.addVisitorRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
-            return result;
-        }
-    }
-    async adminLogin(arg0: string): Promise<boolean> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.adminLogin(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.adminLogin(arg0);
             return result;
         }
     }
@@ -279,6 +265,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.saveCallerUserProfile(arg0);
+            return result;
+        }
+    }
+    async updateVisitorRecord(arg0: Nat, arg1: string, arg2: string, arg3: string, arg4: string, arg5: string, arg6: string, arg7: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateVisitorRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateVisitorRecord(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             return result;
         }
     }
