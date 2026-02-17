@@ -33,6 +33,7 @@ export interface _SERVICE {
     undefined
   >,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'changeAdminPassword' : ActorMethod<[string, string], boolean>,
   'exportVisitorRecords' : ActorMethod<[], Array<EntryIdVisitorRecord>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
@@ -40,6 +41,7 @@ export interface _SERVICE {
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'unlockAdminPrivileges' : ActorMethod<[string], boolean>,
   'updateVisitorRecord' : ActorMethod<
     [Nat, string, string, string, string, string, string, string],
     undefined

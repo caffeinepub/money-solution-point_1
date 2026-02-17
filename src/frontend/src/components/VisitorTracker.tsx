@@ -1,24 +1,29 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, FileSpreadsheet, Lock, Unlock } from 'lucide-react';
+import { Download, FileSpreadsheet, Lock, Unlock, KeyRound } from 'lucide-react';
 import VisitorForm from './VisitorForm';
 import VisitorTable from './VisitorTable';
 import AdminLogin from './AdminLogin';
-import { useGetVisitorRecords, useExportVisitorRecords } from '../hooks/useQueries';
+import ChangeAdminPasswordDialog from './ChangeAdminPasswordDialog';
+import { useGetVisitorRecords, useExportVisitorRecords, useChangeAdminPassword } from '../hooks/useQueries';
 import { useAdminMode } from '../hooks/useAdminMode';
 import { exportToCSV } from '../utils/exportToCSV';
 import { exportToXLSX } from '../utils/exportToXLSX';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function VisitorTracker() {
+  const queryClient = useQueryClient();
   const { isUnlocked, isLoading: adminLoading, unlock, lock } = useAdminMode();
   const [showAdminDialog, setShowAdminDialog] = useState(false);
+  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   
   const { data: records = [], isLoading } = useGetVisitorRecords(isUnlocked);
   const { refetch: refetchExportData } = useExportVisitorRecords();
+  const changePasswordMutation = useChangeAdminPassword();
 
   const handleExportCSV = async () => {
     if (!isUnlocked) {
@@ -69,18 +74,51 @@ export default function VisitorTracker() {
   const handleAdminToggle = () => {
     if (isUnlocked) {
       lock();
+      // Clear admin-only cached data
+      queryClient.removeQueries({ queryKey: ['visitorRecords'] });
+      queryClient.removeQueries({ queryKey: ['exportVisitorRecords'] });
       toast.success('Admin mode locked');
     } else {
       setShowAdminDialog(true);
     }
   };
 
-  const handleUnlock = (password: string): boolean => {
-    const success = unlock(password);
-    if (success) {
-      toast.success('Admin access granted');
+  const handleUnlock = async (password: string): Promise<boolean> => {
+    try {
+      const success = await unlock(password);
+      if (success) {
+        toast.success('Admin access granted');
+        // Trigger immediate refetch of visitor records after successful unlock
+        queryClient.invalidateQueries({ queryKey: ['visitorRecords'] });
+        return true;
+      } else {
+        toast.error('Incorrect password. Access denied.');
+        return false;
+      }
+    } catch (error) {
+      console.error('Unlock error:', error);
+      toast.error('Failed to verify password. Please try again.');
+      return false;
     }
-    return success;
+  };
+
+  const handleChangePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      const result = await changePasswordMutation.mutateAsync({
+        oldPassword: currentPassword,
+        newPassword: newPassword,
+      });
+
+      if (result) {
+        toast.success('Password updated successfully. Your new password will be required for future Admin unlocks.');
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error('Change password error:', error);
+      throw error;
+    }
   };
 
   return (
@@ -97,25 +135,38 @@ export default function VisitorTracker() {
                 Daily Banker Visitor Tracker
               </p>
             </div>
-            <Button
-              variant={isUnlocked ? 'default' : 'outline'}
-              size="sm"
-              onClick={handleAdminToggle}
-              disabled={adminLoading}
-              className="gap-2"
-            >
-              {isUnlocked ? (
-                <>
-                  <Unlock className="w-4 h-4" />
-                  <span className="hidden sm:inline">Lock Admin</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4" />
-                  <span className="hidden sm:inline">Unlock Admin</span>
-                </>
+            <div className="flex items-center gap-2">
+              {isUnlocked && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowChangePasswordDialog(true)}
+                  className="gap-2"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  <span className="hidden sm:inline">Change Password</span>
+                </Button>
               )}
-            </Button>
+              <Button
+                variant={isUnlocked ? 'default' : 'outline'}
+                size="sm"
+                onClick={handleAdminToggle}
+                disabled={adminLoading}
+                className="gap-2"
+              >
+                {isUnlocked ? (
+                  <>
+                    <Unlock className="w-4 h-4" />
+                    <span className="hidden sm:inline">Lock Admin</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span className="hidden sm:inline">Unlock Admin</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -217,6 +268,12 @@ export default function VisitorTracker() {
         open={showAdminDialog}
         onOpenChange={setShowAdminDialog}
         onUnlock={handleUnlock}
+      />
+
+      <ChangeAdminPasswordDialog
+        open={showChangePasswordDialog}
+        onOpenChange={setShowChangePasswordDialog}
+        onSubmit={handleChangePassword}
       />
     </div>
   );

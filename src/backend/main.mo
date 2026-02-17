@@ -1,5 +1,5 @@
-import Array "mo:core/Array";
 import Text "mo:core/Text";
+import Array "mo:core/Array";
 import Time "mo:core/Time";
 import Map "mo:core/Map";
 import Iter "mo:core/Iter";
@@ -7,12 +7,12 @@ import Order "mo:core/Order";
 import EntryID "mo:core/Nat";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
-
 import Migration "migration";
+
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 
-// Enable migration through conditional with hook
+// Use migration function via "with" clause.
 (with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
@@ -44,6 +44,10 @@ actor {
   var nextEntryId = 0;
   let visitorRecords = Map.empty<EntryID.Nat, VisitorRecord>();
 
+  // Admin password now persisted in stable state through migration code.
+  // Default is "9533", but migration preserves existing passwords.
+  var adminPassword : Text = "9533";
+
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access profiles");
@@ -74,6 +78,10 @@ actor {
     reasonForVisit : Text,
     visitType : Text,
   ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add visitor records");
+    };
+
     let timestamp = Time.now();
     let record = {
       fullName;
@@ -107,10 +115,37 @@ actor {
     };
   };
 
-  public query ({ caller }) func getSortedVisitorRecords() : async [EntryIdVisitorRecord] {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can view records table");
+  public shared ({ caller }) func unlockAdminPrivileges(password : Text) : async Bool {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can unlock admin privileges");
     };
+
+    if (password == adminPassword) {
+      AccessControl.assignRole(accessControlState, caller, caller, #admin);
+      true;
+    } else {
+      false;
+    };
+  };
+
+  public shared ({ caller }) func changeAdminPassword(oldPassword : Text, newPassword : Text) : async Bool {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can change the password");
+    };
+
+    if (oldPassword != adminPassword) {
+      return false;
+    };
+
+    adminPassword := newPassword;
+    true;
+  };
+
+  public shared query ({ caller }) func getSortedVisitorRecords() : async [EntryIdVisitorRecord] {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+
     visitorRecords.entries().toArray().map(
       func((id, record)) {
         { id; record };
@@ -118,10 +153,11 @@ actor {
     ).sort(EntryIdVisitorRecord.compareByTimestamp);
   };
 
-  public query ({ caller }) func exportVisitorRecords() : async [EntryIdVisitorRecord] {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can export records");
+  public shared query ({ caller }) func exportVisitorRecords() : async [EntryIdVisitorRecord] {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
+
     visitorRecords.entries().toArray().map(
       func((id, record)) {
         { id; record };
@@ -139,8 +175,8 @@ actor {
     reasonForVisit : Text,
     visitType : Text,
   ) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can modify records");
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
     };
 
     let timestamp = Time.now();

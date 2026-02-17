@@ -1,32 +1,6 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Admin view uses only server-stored shared visitor records",
-  "requirements": [
-    {
-      "id": "REQ-18",
-      "summary": "Ensure Admin records table and exports use only backend-fetched shared visitor records (no client local storage as source-of-truth).",
-      "acceptanceCriteria": [
-        "No visitor record data is stored as the source-of-truth in localStorage/sessionStorage on the client.",
-        "After an Admin unlock, the table and export actions use records fetched from the backend canister and match the shared server state."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Ensure visitor-record reads and exports are always sourced from backend actor calls (shared dataset). Make export retrieval an explicit backend fetch at export time (not derived from any client-persisted data), and keep query keys/invalidation aligned so Admin table reflects latest server state."
-        },
-        {
-          "path": "frontend/src/components/VisitorTracker.tsx",
-          "operation": "modify",
-          "description": "Update Admin export actions to fetch the latest visitor records from the backend at the time of export (e.g., by triggering the export query/refetch) and then pass those fetched records into exportToCSV/exportToXLSX. Keep Admin-only gating unchanged and ensure no visitor-record persistence to localStorage/sessionStorage is introduced."
-        },
-        {
-          "path": "frontend/src/components/VisitorTable.tsx",
-          "operation": "modify",
-          "description": "Confirm the Admin records table renders only the records provided from backend-backed React Query state and does not read/write visitor records to localStorage/sessionStorage; if any client-side persistence is present, remove it while preserving Admin-only edit behavior."
-        }
-      ]
-    }
-  ]
+  "title": "Change Admin unlock password to 9533 (frontend-only)",
+  "requirements": []
 }

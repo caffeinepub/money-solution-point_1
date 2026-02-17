@@ -1,15 +1,16 @@
 {
   "frontend/src/App.tsx": "Root application component that wraps the app with QueryClient, InternetIdentity, and Theme providers, rendering the main VisitorTracker component with toast notifications.",
-  "frontend/src/components/VisitorTracker.tsx": "Main dashboard component with visitor entry form, admin unlock/lock toggle, and admin-gated records table with export controls that fetch fresh data from backend at export time using the dedicated export query hook.",
+  "frontend/src/components/VisitorTracker.tsx": "Main dashboard component with visitor entry form, admin unlock/lock toggle, password change button, admin-gated records table, and export controls with English success toast explicitly stating the new password is required for future Admin unlocks.",
   "frontend/src/components/VisitorForm.tsx": "Form component for adding new visitor records with validation for all required fields including name, contact, address, organization, income level, visit type, and purpose.",
   "frontend/src/components/VisitorTable.tsx": "Responsive table component displaying visitor records from backend-provided props with admin-only inline edit actions, proper loading/empty states, and no client-side data persistence.",
-  "frontend/src/components/AdminLogin.tsx": "Password-only admin authentication dialog with English labels, error handling for incorrect passwords, and session-based unlock using the useAdminMode hook.",
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for visitor records management including fetching, adding, updating, and exporting records with proper cache invalidation across all query keys to ensure data consistency.",
-  "frontend/src/hooks/useAdminMode.ts": "Custom hook managing session-based admin mode state with password validation (MSP508), persisting unlock status to sessionStorage for the current session only.",
+  "frontend/src/components/AdminLogin.tsx": "Password authentication dialog with async onUnlock flow that trims whitespace from input, clears errors on input changes, and shows English-only labels and error messages with proper loading state during verification.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for visitor records management and admin operations including a new mutation hook for changing admin password that calls the backend changeAdminPassword method.",
+  "frontend/src/hooks/useAdminMode.ts": "Custom hook managing backend-verified admin mode state with async password validation via unlockAdminPrivileges, session persistence as UI hint, and backend role verification via isCallerAdmin on mount to ensure stored unlock state is valid.",
   "frontend/src/utils/formatTimestamp.ts": "Utility function converting backend nanosecond timestamps to human-readable date/time strings in English format.",
   "frontend/src/utils/exportToCSV.ts": "Client-side CSV export utility that converts visitor records to CSV format with proper escaping and triggers browser download.",
   "frontend/src/utils/exportToXLSX.ts": "Client-side Excel export utility using SheetJS library dynamically imported from CDN with proper TypeScript type definitions and @vite-ignore comment to generate .xlsx files with formatted columns and compression.",
   "frontend/src/index.css": "Global styles with OKLCH color system defining a professional blue-themed palette for light and dark modes suitable for office administration.",
   "frontend/tailwind.config.js": "Tailwind configuration with custom color tokens, Inter font family, and extended theme settings for consistent professional office design.",
-  "frontend/src/hooks/useActor.ts": "Actor initialization hook that creates backend actor instances with identity support, removing all admin token and secret parameter initialization logic."
+  "frontend/src/hooks/useActor.ts": "Actor initialization hook that creates backend actor instances with identity support, removing all admin token and secret parameter initialization logic.",
+  "frontend/src/components/ChangeAdminPasswordDialog.tsx": "Dialog component for changing admin password with fields for current password, new password, and confirmation, including client-side validation and an informational alert clarifying that the new password will be required for future Admin unlocks."
 }

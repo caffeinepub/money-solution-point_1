@@ -1,42 +1,28 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T12:08:44.763Z",
+  "generatedAt": "2026-02-17T13:07:27.450Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 1,
+    "total": 2,
+    "implemented": 0,
     "items": [
       {
-        "id": "REQ-16",
-        "summary": "Store visitor records and the next entry ID in stable canister state so data is saved on the server and remains available across canister upgrades/redeploys, and so all users accessing the website contribute to the same shared dataset.",
+        "id": "REQ-30",
+        "summary": "Update the backend Admin unlock password so that Admin unlock succeeds only when the provided password exactly equals \"9533\" (replacing the current default \"MSP9533\").",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-17",
-        "summary": "Add conditional state migration support (backend/migration.mo) to safely upgrade existing deployments to the new stable storage format without data loss.",
+        "id": "REQ-31",
+        "summary": "Ensure canister upgrades preserve the existing persisted Admin password; only initialize the Admin password to \"9533\" when no previously-stored Admin password exists in stable state during migration/upgrade.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
-      },
-      {
-        "id": "REQ-18",
-        "summary": "Ensure the Admin records table and Admin exports always reflect the server-stored shared dataset (no per-device/per-browser local-only storage for visitor records).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/VisitorTracker.tsx",
-          "frontend/src/components/VisitorTable.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/VisitorTracker.tsx"
-        ]
       }
     ]
   },
@@ -45,10 +31,11 @@
     "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
-    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/VisitorTracker.tsx",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -16,7 +16,7 @@ import { Lock } from 'lucide-react';
 interface AdminLoginProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUnlock: (password: string) => boolean;
+  onUnlock: (password: string) => Promise<boolean>;
 }
 
 export default function AdminLogin({ open, onOpenChange, onUnlock }: AdminLoginProps) {
@@ -24,21 +24,28 @@ export default function AdminLogin({ open, onOpenChange, onUnlock }: AdminLoginP
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
 
-    const success = onUnlock(password);
-    
-    if (success) {
-      setPassword('');
-      onOpenChange(false);
-    } else {
-      setError('Incorrect password. Please try again.');
+    try {
+      // Trim whitespace before sending to backend
+      const trimmedPassword = password.trim();
+      const success = await onUnlock(trimmedPassword);
+      
+      if (success) {
+        setPassword('');
+        onOpenChange(false);
+      } else {
+        setError('Incorrect password. Please try again.');
+      }
+    } catch (error) {
+      console.error('Unlock error:', error);
+      setError('Failed to verify password. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -47,6 +54,14 @@ export default function AdminLogin({ open, onOpenChange, onUnlock }: AdminLoginP
       setError('');
     }
     onOpenChange(newOpen);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    // Clear error when user starts typing
+    if (error) {
+      setError('');
+    }
   };
 
   return (
@@ -71,7 +86,7 @@ export default function AdminLogin({ open, onOpenChange, onUnlock }: AdminLoginP
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 placeholder="Enter admin password"
                 autoFocus
                 disabled={isSubmitting}
@@ -92,8 +107,8 @@ export default function AdminLogin({ open, onOpenChange, onUnlock }: AdminLoginP
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !password}>
-              {isSubmitting ? 'Unlocking...' : 'Unlock Admin'}
+            <Button type="submit" disabled={isSubmitting || !password.trim()}>
+              {isSubmitting ? 'Verifying...' : 'Unlock Admin'}
             </Button>
           </DialogFooter>
         </form>

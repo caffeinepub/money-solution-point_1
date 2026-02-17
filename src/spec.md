@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Persist visitor records in stable canister state so all users and Admins see the same shared dataset across sessions and canister upgrades.
+**Goal:** Update the backend Admin unlock password default to "9533" while preserving any previously persisted Admin password across upgrades.
 
 **Planned changes:**
-- Move visitor records storage (and next entry ID) from in-memory/client-local usage to stable canister state in the existing Motoko backend actor.
-- Add conditional state migration logic to preserve any existing stored visitor records/IDs when upgrading to the new stable storage format.
-- Update the Admin records table and export actions to always fetch and use the server-stored shared dataset (no localStorage/sessionStorage as source-of-truth), while keeping existing Admin-only restrictions.
+- Change the default Admin password value in `backend/main.mo` from "MSP9533" to "9533".
+- Update upgrade/migration logic so a previously stored Admin password remains unchanged, and only initialize to "9533" when no stored value exists.
+- Ensure `unlockAdminPrivileges("9533")` succeeds for authenticated users and `unlockAdminPrivileges("MSP9533")` fails unless explicitly persisted to that value.
 
-**User-visible outcome:** Visitor records added by any user are saved on the server and are visible to Admin after unlock; records remain available after canister redeploy/upgrade, and Admin table/exports reflect the shared server dataset.
+**User-visible outcome:** Admin unlock works with password "9533" by default, and existing deployments keep their previously set Admin password after upgrades.

@@ -33,6 +33,7 @@ export enum UserRole {
 export interface backendInterface {
     addVisitorRecord(fullName: string, email: string, address: string, jobInfo: string, incomeLevel: string, reasonForVisit: string, visitType: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    changeAdminPassword(oldPassword: string, newPassword: string): Promise<boolean>;
     exportVisitorRecords(): Promise<Array<EntryIdVisitorRecord>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -40,5 +41,6 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    unlockAdminPrivileges(password: string): Promise<boolean>;
     updateVisitorRecord(recordId: Nat, fullName: string, email: string, address: string, jobInfo: string, incomeLevel: string, reasonForVisit: string, visitType: string): Promise<void>;
 }

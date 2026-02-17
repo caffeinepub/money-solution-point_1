@@ -22,6 +22,7 @@ export function useGetVisitorRecords(enabled: boolean = true) {
       return actor.getSortedVisitorRecords();
     },
     enabled: !!actor && !isFetching && enabled,
+    retry: false,
   });
 }
 
@@ -74,6 +75,17 @@ export function useUpdateVisitorRecord() {
   });
 }
 
+export function useChangeAdminPassword() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async ({ oldPassword, newPassword }: { oldPassword: string; newPassword: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.changeAdminPassword(oldPassword, newPassword);
+    },
+  });
+}
+
 export function useExportVisitorRecords() {
   const { actor, isFetching } = useActor();
 
@@ -84,5 +96,6 @@ export function useExportVisitorRecords() {
       return actor.exportVisitorRecords();
     },
     enabled: false,
+    retry: false,
   });
 }

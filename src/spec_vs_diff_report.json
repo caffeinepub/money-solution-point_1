@@ -1,35 +1,32 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T12:08:44.760Z",
-  "summary": "Backend migration scaffolding was added and frontend queries now fetch/admin-export records from the backend via React Query, but the backend visitor records/nextEntryId are still held in non-stable (in-memory) variables, so true stable persistence across upgrades is not implemented. Additionally, the diff suggests the Admin password value was changed to \"MSP508\", which was not requested and violates the constraint to keep the existing Admin password value unchanged.",
+  "generatedAt": "2026-02-17T13:07:27.447Z",
+  "summary": "REQ-30 is largely implemented by changing the in-canister default admin password to \"9533\" and keeping unlock logic as an equality check against the stored password. However, the upgrade/migration logic does not fully meet REQ-31 because it overwrites an existing stored password when it equals \"MSP9533\", which violates the requirement to preserve any previously persisted admin password value and also conflicts with REQ-30’s AC about \"MSP9533\" working if it was previously persisted.",
   "missing_requirements": [
     {
-      "id": "REQ-16",
-      "requirement": "Store visitor records and the next entry ID in stable canister state so data is saved on the server and remains available across canister upgrades/redeploys, and shared across all users.",
-      "reason": "In backend/main.mo, visitorRecords and nextEntryId are defined as regular (non-stable) variables/maps (e.g., `var nextEntryId = 0; let visitorRecords = Map.empty...`). There is no evidence of `stable var` usage or postupgrade/preupgrade persistence for these fields in the provided diff, so records would not survive upgrades/redeploys.",
+      "id": "REQ-31",
+      "requirement": "Preserve any existing persisted Admin password across upgrades; initialize to \"9533\" only when no previously-stored admin password exists in stable state.",
+      "reason": "The migration overwrites the stored password not only when it is missing/empty, but also when it equals \"MSP9533\". This fails the requirement to preserve an existing stored admin password value during upgrade, regardless of what it is.",
       "evidence": [
-        "backend/main.mo"
+        "backend/migration.mo: comment and logic `if (old.adminPassword == \"\" or old.adminPassword == \"MSP9533\") { \"9533\" } else { old.adminPassword; }`"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Admin password appears to have been changed to \"MSP508\".",
-      "reason": "BuildRequest explicitly says not to change the Admin password value. The diff summary text states: `useAdminMode` has password validation (MSP508) and project_state.json summary also mentions password \"MSP508\".",
+      "description": "Upgrade migration forcibly changes the stored admin password from \"MSP9533\" to \"9533\" (treating \"MSP9533\" as an old default to be replaced).",
+      "reason": "BuildRequest/REQ-31 only permits initializing to \"9533\" when no prior stored password exists; it does not request altering any existing stored password values (including \"MSP9533\").",
       "evidence": [
-        "frontend-file-summaries.txt",
-        "project_state.json"
+        "backend/migration.mo: `if (old.adminPassword == \"\" or old.adminPassword == \"MSP9533\") { \"9533\" }`",
+        "backend/migration.mo: comment `// Preserve existing password during upgrades, unless it's the old default \"MSP9533\"`"
       ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.74,
   "changed_files": [
     "backend/main.mo",
     "backend/migration.mo",
-    "frontend-file-summaries.txt",
-    "frontend/src/components/VisitorTracker.tsx",
-    "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]
 }

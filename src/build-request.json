@@ -1,72 +1,53 @@
 {
   "kind": "build_request",
-  "title": "Persist shared visitor records on the canister so all users see the same data in Admin view",
+  "title": "Change Admin unlock password to 9533",
   "projectName": "MONEY SOLUTION POINT",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-16",
-      "text": "Store visitor records and the next entry ID in stable canister state so data is saved on the server and remains available across canister upgrades/redeploys, and so all users accessing the website contribute to the same shared dataset.",
+      "id": "REQ-30",
+      "text": "Update the backend Admin unlock password so that Admin unlock succeeds only when the provided password exactly equals \"9533\" (replacing the current default \"MSP9533\").",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-3"
         ],
         "quotes": [
-          "DATA SAVE IN SERVER ALL ACCESS THIS WEBSITE AND SAME DATA SHOW IN ADMIN"
+          "PASWWORD CHANGE TO 9533"
         ]
       },
       "acceptanceCriteria": [
-        "After adding a visitor record, the record is persisted in canister stable state (not only in-memory).",
-        "After a canister upgrade/redeploy, previously added visitor records are still present.",
-        "Records added by one user/device are visible to an Admin user/device after Admin unlock (shared global dataset)."
+        "In backend/main.mo, the default admin password value is \"9533\" (not \"MSP9533\").",
+        "Calling unlockAdminPrivileges(\"9533\") returns true for an authenticated user and grants Admin privileges.",
+        "Calling unlockAdminPrivileges(\"MSP9533\") returns false (unless the Admin password was previously changed and persisted to that value)."
       ]
     },
     {
-      "id": "REQ-17",
-      "text": "Add conditional state migration support (backend/migration.mo) to safely upgrade existing deployments to the new stable storage format without data loss.",
+      "id": "REQ-31",
+      "text": "Ensure canister upgrades preserve the existing persisted Admin password; only initialize the Admin password to \"9533\" when no previously-stored Admin password exists in stable state during migration/upgrade.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-3"
         ],
         "quotes": [
-          "DATA SAVE IN SERVER ALL ACCESS THIS WEBSITE AND SAME DATA SHOW IN ADMIN"
+          "PASWWORD CHANGE TO 9533"
         ]
       },
       "acceptanceCriteria": [
-        "If an existing canister already has visitor records, upgrading to the new version preserves all existing records and their IDs.",
-        "Upgrades do not change the existing VisitorRecord fields or break Admin-only access to listing/export/editing records."
-      ]
-    },
-    {
-      "id": "REQ-18",
-      "text": "Ensure the Admin records table and Admin exports always reflect the server-stored shared dataset (no per-device/per-browser local-only storage for visitor records).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "DATA SAVE IN SERVER ALL ACCESS THIS WEBSITE AND SAME DATA SHOW IN ADMIN"
-        ]
-      },
-      "acceptanceCriteria": [
-        "No visitor record data is stored as the source-of-truth in localStorage/sessionStorage on the client.",
-        "After an Admin unlock, the table and export actions use records fetched from the backend canister and match the shared server state."
+        "After an upgrade, if a deployment previously had a stored Admin password, that stored value remains unchanged.",
+        "After an upgrade from a deployment with no stored Admin password, the Admin password is initialized to exactly \"9533\"."
       ]
     }
   ],
   "constraints": [
-    "Keep the backend as a single Motoko actor in backend/main.mo; do not introduce additional backend services.",
-    "Do not modify files under frontend/src/components/ui or any frontend immutablePaths listed in SYSTEM_CONTEXT.",
     "All user-facing text must be in English.",
-    "Keep existing Admin-only restrictions: viewing the records table, editing records, and exporting records remain Admin-only; adding a new visitor record remains available to non-admin users."
+    "Respect the single-actor backend architecture; keep Motoko logic in backend/main.mo.",
+    "Do not edit frontend files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Adding third-party databases or external storage providers.",
-    "Implementing real-time updates (e.g., WebSockets) for live syncing across clients.",
-    "Changing the Admin password value or Admin unlock UX flow beyond what is necessary to ensure shared server-backed data is displayed."
+    "Do not change visitor record fields, storage, export formats, or Admin-only gating behavior beyond updating the Admin password value.",
+    "Do not address the known issue about records not showing after Admin unlock unless it is directly required to complete the password change."
   ],
   "imageRequirements": {
     "required": [],

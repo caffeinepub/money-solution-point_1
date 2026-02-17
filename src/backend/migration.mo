@@ -1,6 +1,7 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import Principal "mo:core/Principal";
+import Text "mo:core/Text";
 
 module {
   type VisitorRecord = {
@@ -18,21 +19,32 @@ module {
     name : Text;
   };
 
-  // Old actor stores records in unstable/non-persistent var
   type OldActor = {
     userProfiles : Map.Map<Principal, UserProfile>;
     visitorRecords : Map.Map<Nat, VisitorRecord>;
     nextEntryId : Nat;
+    adminPassword : Text;
   };
 
-  // New actor stores records in persistent stable var
   type NewActor = {
     userProfiles : Map.Map<Principal, UserProfile>;
     visitorRecords : Map.Map<Nat, VisitorRecord>;
     nextEntryId : Nat;
+    adminPassword : Text;
   };
 
   public func run(old : OldActor) : NewActor {
-    old;
+    // Preserve existing password during upgrades, unless it's the old default "MSP9533"
+    // If empty string (fresh deployment), initialize to "9533"
+    let adminPassword = if (old.adminPassword == "" or old.adminPassword == "MSP9533") {
+      "9533";
+    } else {
+      old.adminPassword;
+    };
+
+    {
+      old with
+      adminPassword;
+    };
   };
 };

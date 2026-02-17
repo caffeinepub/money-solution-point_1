@@ -38,6 +38,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'changeAdminPassword' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
   'exportVisitorRecords' : IDL.Func(
       [],
       [IDL.Vec(EntryIdVisitorRecord)],
@@ -57,6 +58,7 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'unlockAdminPrivileges' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'updateVisitorRecord' : IDL.Func(
       [
         Nat,
@@ -106,6 +108,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'changeAdminPassword' : IDL.Func([IDL.Text, IDL.Text], [IDL.Bool], []),
     'exportVisitorRecords' : IDL.Func(
         [],
         [IDL.Vec(EntryIdVisitorRecord)],
@@ -125,6 +128,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'unlockAdminPrivileges' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'updateVisitorRecord' : IDL.Func(
         [
           Nat,
